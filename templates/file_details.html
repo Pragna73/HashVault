@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ file.filename }} — File Details | HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.25rem;">
+      <a href="{{ url_for('files_view') }}" style="color: var(--accent-gold); text-decoration: none;">&larr; Back to Protected Files</a>
+    </div>
+    <h2 class="page-title">{{ file.filename }}</h2>
+    <p class="page-subtitle">Cryptographic metadata and integrity change audit trail</p>
+  </div>
+
+  <div>
+    {% if file.status == 'SAFE' %}
+      <span class="badge badge-safe" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">✓ SAFE</span>
+    {% elif file.status == 'MODIFIED' %}
+      <span class="badge badge-modified" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">⚠️ MODIFIED</span>
+    {% elif file.status == 'NEW' %}
+      <span class="badge badge-new" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">➕ NEW FILE</span>
+    {% elif file.status == 'DELETED' %}
+      <span class="badge badge-deleted" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">🗑️ DELETED</span>
+    {% endif %}
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+  <!-- Left Column: Hashes and Details -->
+  <div class="card" style="margin-bottom: 0;">
+    <div class="card-title">🔐 Cryptographic Fingerprints</div>
+    
+    <div style="margin-bottom: 1.25rem;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.35rem;">
+        Baseline SHA-256 Digest
+      </div>
+      <div class="hash-block">
+        <span>{{ file.baseline_hash }}</span>
+        <button type="button" class="copy-btn" data-hash="{{ file.baseline_hash }}" title="Copy Baseline Hash">📋</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 1.25rem;">
+      <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.35rem;">
+        Current SHA-256 Digest
+      </div>
+      <div class="hash-block" style="{% if file.status == 'MODIFIED' %}border-color: var(--color-modified); color: #fde68a;{% endif %}">
+        <span>{{ file.current_hash or 'None' }}</span>
+        {% if file.current_hash and file.current_hash != 'NONE (Deleted)' %}
+          <button type="button" class="copy-btn" data-hash="{{ file.current_hash }}" title="Copy Current Hash">📋</button>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if file.status == 'MODIFIED' %}
+    <div class="security-box">
+      <div class="security-box-title">⚡ Cryptographic Discrepancy Detected</div>
+      <div class="security-box-text">
+        The current hash computed from disk does not match the trusted baseline created on {{ file.first_seen }}. This indicates the file contents were altered.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column: Metadata Overview -->
+  <div class="card" style="margin-bottom: 0;">
+    <div class="card-title">ℹ️ Metadata Overview</div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Relative Path</div>
+        <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #fff; margin-top: 0.15rem;">{{ file.filepath }}</div>
+      </div>
+
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">First Seen / Baseline Added</div>
+        <div style="font-size: 0.85rem; color: #fff; margin-top: 0.15rem;">{{ file.first_seen }}</div>
+      </div>
+
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Last Verified</div>
+        <div style="font-size: 0.85rem; color: #fff; margin-top: 0.15rem;">{{ file.last_checked }}</div>
+      </div>
+
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Cumulative Change Count</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: {% if file.change_count > 0 %}var(--color-modified){% else %}var(--color-safe){% endif %}; margin-top: 0.15rem;">
+          {{ file.change_count }} recorded modification(s)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Historical Audit Events for this File -->
+<div class="card">
+  <div class="card-title">📜 Change Event Log for this File</div>
+  <div class="card-desc">All historical integrity events detected during scans</div>
+
+  {% if events %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Event Type</th>
+          <th>Old Hash (Baseline)</th>
+          <th>New Hash (Observed)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td style="font-size: 0.8rem; color: var(--text-secondary);">{{ ev.timestamp }}</td>
+          <td>
+            {% if ev.event_type == 'MODIFIED' %}
+              <span class="badge badge-modified">MODIFIED</span>
+            {% elif ev.event_type == 'NEW' %}
+              <span class="badge badge-new">NEW</span>
+            {% elif ev.event_type == 'DELETED' %}
+              <span class="badge badge-deleted">DELETED</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ev.old_hash and ev.old_hash != 'NONE (New unmonitored file)' %}
+              <div class="hash-snippet" data-hash="{{ ev.old_hash }}" title="Click to copy full hash">
+                <span>{{ ev.old_hash[:8] }}...{{ ev.old_hash[-6:] }}</span>
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 0.75rem;">N/A</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ev.new_hash and ev.new_hash != 'NONE (File removed)' %}
+              <div class="hash-snippet" data-hash="{{ ev.new_hash }}" title="Click to copy full hash">
+                <span>{{ ev.new_hash[:8] }}...{{ ev.new_hash[-6:] }}</span>
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 0.75rem;">None</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem;">
+    No historical change events logged for this file.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

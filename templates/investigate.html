@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation Mode — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Security Investigation Mode</h2>
+    <p class="page-subtitle">Detailed cryptographic anomaly analysis and incident triage</p>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-primary" id="btn-run-scan">🔍 Re-Scan Filesystem</button>
+  </div>
+</div>
+
+{% if anomalies %}
+  <div class="alert-banner alert-warning" style="margin-bottom: 2rem;">
+    <div class="alert-info-content">
+      <div class="alert-icon-wrap">🔬</div>
+      <div>
+        <div class="alert-title">{{ anomalies|length }} Anomaly / Anomalies Requiring Review</div>
+        <div class="alert-desc">Evaluate the cryptographic findings below to determine whether changes stem from authorized operations or unexpected modifications.</div>
+      </div>
+    </div>
+  </div>
+
+  {% for item in anomalies %}
+  <div class="investigation-card type-{{ item.event_type|lower }}">
+    <div class="investigation-header">
+      <div>
+        <div class="investigation-title">
+          📄 {{ item.filename }}
+        </div>
+        <div class="investigation-path">{{ item.filepath }}</div>
+      </div>
+      <div>
+        {% if item.event_type == 'MODIFIED' %}
+          <span class="badge badge-modified">MODIFIED EVENT</span>
+        {% elif item.event_type == 'NEW' %}
+          <span class="badge badge-new">NEW FILE DETECTED</span>
+        {% elif item.event_type == 'DELETED' %}
+          <span class="badge badge-deleted">FILE REMOVED</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Hash Comparison Details -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;">
+          Baseline Fingerprint (Original)
+        </div>
+        <div class="hash-block" style="font-size: 0.75rem;">
+          <span>{{ item.old_hash }}</span>
+          {% if item.old_hash and item.old_hash != 'NONE (New unmonitored file)' %}
+            <button type="button" class="copy-btn" data-hash="{{ item.old_hash }}" title="Copy Baseline Hash">📋</button>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;">
+          Observed Fingerprint (Current)
+        </div>
+        <div class="hash-block" style="font-size: 0.75rem; {% if item.event_type == 'MODIFIED' %}border-color: var(--color-modified);{% endif %}">
+          <span>{{ item.new_hash }}</span>
+          {% if item.new_hash and item.new_hash != 'NONE (File removed)' %}
+            <button type="button" class="copy-btn" data-hash="{{ item.new_hash }}" title="Copy Observed Hash">📋</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Interpretation Box -->
+    <div class="security-box">
+      <div class="security-box-title">Security Interpretation</div>
+      <div class="security-box-text">
+        {% if item.event_type == 'MODIFIED' %}
+          File contents changed after the trusted baseline was created. The cryptographic hash changed from the initial baseline recording.
+        {% elif item.event_type == 'NEW' %}
+          A file was detected that was not present in the trusted baseline. It is currently unmonitored.
+        {% elif item.event_type == 'DELETED' %}
+          A previously monitored file is no longer present on the storage filesystem.
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Neutral Defensive Recommendation -->
+    <div class="security-recommendation">
+      <span>🛡️ <strong>Investigation Recommendation:</strong> Verify whether this change was authorized and expected by system administrators. (Note: Modification does not necessarily indicate malicious software).</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+      <div>Detection Recorded: {{ item.timestamp }}</div>
+      <div>Event Log ID: #{{ item.id }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card" style="text-align: center; padding: 3.5rem 1rem;">
+    <div style="font-size: 3rem; margin-bottom: 0.75rem;">🛡️</div>
+    <div style="font-size: 1.25rem; font-weight: 700; color: #fff;">No Active Anomalies Detected</div>
+    <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+      All monitored files are currently in a <strong>SAFE</strong> status matching their baseline cryptographic fingerprints.
+    </p>
+    <div style="margin-top: 1.5rem;">
+      <a href="{{ url_for('files_view') }}" class="btn btn-secondary">View File Inventory</a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

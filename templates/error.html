@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code }} — HashVault{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 4rem 1rem;">
+  <div style="font-size: 3.5rem; margin-bottom: 1rem;">{% if error_code == 404 %}🔍{% else %}⚠️{% endif %}</div>
+  <h2 style="color: #fff; font-size: 1.6rem; margin-bottom: 0.5rem;">{{ error_code }} — {{ error_title }}</h2>
+  <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem auto; font-size: 0.95rem;">
+    {{ error_message }}
+  </p>
+  <div>
+    <a href="{{ url_for('dashboard_view') }}" class="btn btn-primary">Return to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

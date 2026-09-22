@@ -1,0 +1,7 @@
+# Access Control Role Definitions
+# Role Mapping: user_id:username:role:status
+1001:sec_admin:SecurityAdministrator:ACTIVE
+1002:audit_lead:ComplianceAuditor:ACTIVE
+1003:soc_analyst1:SOCAnalyst:ACTIVE
+1004:soc_analyst2:SOCAnalyst:ACTIVE
+1005:sys_operator:SystemOperator:DISABLED

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Protected Files — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Protected Files Inventory</h2>
+    <p class="page-subtitle">Catalog of monitored assets and their cryptographic SHA-256 fingerprints</p>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-secondary" id="btn-create-baseline">⚡ Create Baseline</button>
+    <button type="button" class="btn btn-primary" id="btn-run-scan">🔍 Run Integrity Scan</button>
+  </div>
+</div>
+
+<div class="card">
+  <!-- Search and Filter Controls -->
+  <div class="filter-bar">
+    <input type="text" id="table-search" class="search-input" placeholder="🔍 Search by filename or path...">
+    
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <label for="status-filter" style="font-size: 0.8rem; color: var(--text-secondary);">Filter Status:</label>
+      <select id="status-filter" class="select-input">
+        <option value="ALL">All Statuses</option>
+        <option value="SAFE">Safe</option>
+        <option value="MODIFIED">Modified</option>
+        <option value="NEW">New</option>
+        <option value="DELETED">Deleted</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Monitored Files Table -->
+  {% if files %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Relative Path</th>
+          <th>Baseline SHA-256</th>
+          <th>Status</th>
+          <th>Last Checked</th>
+          <th>Changes</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in files %}
+        <tr>
+          <td style="font-weight: 600; color: #fff;">
+            📄 {{ f.filename }}
+          </td>
+          <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">
+            {{ f.filepath }}
+          </td>
+          <td>
+            {% if f.baseline_hash and f.baseline_hash != 'NONE (Unmonitored)' %}
+              <div class="hash-snippet" data-hash="{{ f.baseline_hash }}" title="Click to copy full SHA-256 hash">
+                <span>{{ f.baseline_hash[:10] }}...{{ f.baseline_hash[-8:] }}</span>
+                <span class="copy-btn">📋</span>
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Unmonitored</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if f.status == 'SAFE' %}
+              <span class="badge badge-safe">✓ SAFE</span>
+            {% elif f.status == 'MODIFIED' %}
+              <span class="badge badge-modified">⚠️ MODIFIED</span>
+            {% elif f.status == 'NEW' %}
+              <span class="badge badge-new">➕ NEW</span>
+            {% elif f.status == 'DELETED' %}
+              <span class="badge badge-deleted">🗑️ DELETED</span>
+            {% else %}
+              <span class="badge">{{ f.status }}</span>
+            {% endif %}
+          </td>
+          <td style="font-size: 0.8rem; color: var(--text-secondary);">
+            {{ f.last_checked }}
+          </td>
+          <td style="font-weight: 600; text-align: center;">
+            {{ f.change_count }}
+          </td>
+          <td>
+            <a href="{{ url_for('file_details_view', file_id=f.id) }}" class="btn btn-secondary btn-sm">View Details &rarr;</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
+    <div style="font-size: 1.1rem; font-weight: 600; color: #fff;">No Monitored Files Found</div>
+    <p style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-muted);">
+      Create a baseline snapshot of your protected files to begin monitoring file integrity.
+    </p>
+    <div style="margin-top: 1.25rem;">
+      <button type="button" class="btn btn-primary" id="btn-create-baseline">⚡ Create Baseline Now</button>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Security Events — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Security Event Audit Log</h2>
+    <p class="page-subtitle">Granular history of detected modifications, additions, and deletions</p>
+  </div>
+  <div class="btn-group">
+    <a href="{{ url_for('export_csv_view') }}" class="btn btn-secondary btn-sm">📥 Export CSV</a>
+    <a href="{{ url_for('export_json_view') }}" class="btn btn-secondary btn-sm">📥 Export JSON</a>
+  </div>
+</div>
+
+<div class="card">
+  <!-- Search & Event Filter -->
+  <div class="filter-bar">
+    <input type="text" id="table-search" class="search-input" placeholder="🔍 Search event log by filename or path...">
+    
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <label for="status-filter" style="font-size: 0.8rem; color: var(--text-secondary);">Event Filter:</label>
+      <select id="status-filter" class="select-input">
+        <option value="ALL">All Events</option>
+        <option value="MODIFIED">Modified</option>
+        <option value="NEW">New</option>
+        <option value="DELETED">Deleted</option>
+      </select>
+    </div>
+  </div>
+
+  {% if events %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Timestamp</th>
+          <th>File</th>
+          <th>Event</th>
+          <th>Old Hash (Baseline)</th>
+          <th>New Hash (Observed)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">#{{ ev.id }}</td>
+          <td style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">{{ ev.timestamp }}</td>
+          <td>
+            <div style="font-weight: 600; color: #fff;">{{ ev.filename }}</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">{{ ev.filepath }}</div>
+          </td>
+          <td>
+            {% if ev.event_type == 'MODIFIED' %}
+              <span class="badge badge-modified">⚠️ MODIFIED</span>
+            {% elif ev.event_type == 'NEW' %}
+              <span class="badge badge-new">➕ NEW</span>
+            {% elif ev.event_type == 'DELETED' %}
+              <span class="badge badge-deleted">🗑️ DELETED</span>
+            {% else %}
+              <span class="badge">{{ ev.event_type }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ev.old_hash and ev.old_hash != 'NONE (New unmonitored file)' %}
+              <div class="hash-snippet" data-hash="{{ ev.old_hash }}" title="Click to copy full hash">
+                <span>{{ ev.old_hash[:8] }}...{{ ev.old_hash[-6:] }}</span>
+                <span class="copy-btn">📋</span>
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Unmonitored</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ev.new_hash and ev.new_hash != 'NONE (File removed)' %}
+              <div class="hash-snippet" data-hash="{{ ev.new_hash }}" title="Click to copy full hash">
+                <span>{{ ev.new_hash[:8] }}...{{ ev.new_hash[-6:] }}</span>
+                <span class="copy-btn">📋</span>
+              </div>
+            {% else %}
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Removed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📋</div>
+    <div style="font-size: 1.1rem; font-weight: 600; color: #fff;">No Security Events Logged</div>
+    <p style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-muted);">
+      No unauthorized file modifications, additions, or deletions have been detected during scans.
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

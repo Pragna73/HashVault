@@ -1,0 +1,11 @@
+# HashVault Security Policy & Firewall Directives
+POLICY_VERSION=2026.1
+ENFORCE_HTTPS=true
+CONTENT_SECURITY_POLICY=default-src 'self' cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com;
+X_FRAME_OPTIONS=DENY
+X_CONTENT_TYPE_OPTIONS=nosniff
+REFERRER_POLICY=strict-origin-when-cross-origin
+MAX_FAILED_LOGIN_ATTEMPTS=5
+LOCKOUT_DURATION_MINUTES=15
+INTEGRITY_SCAN_CRON=0 */4 * * *
+ALERT_DISPATCH=LOCAL_SECURITY_EVENT_LOG

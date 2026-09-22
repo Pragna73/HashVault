@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — HashVault File Integrity Monitoring{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Security Dashboard</h2>
+    <p class="page-subtitle">Real-time cryptographic file integrity status and incident overview</p>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-secondary" id="btn-create-baseline">⚡ Create Baseline</button>
+    <button type="button" class="btn btn-primary" id="btn-run-scan">🔍 Run Integrity Scan</button>
+  </div>
+</div>
+
+<!-- Security Alert Banner if changes are detected -->
+{% if metrics.modified_files > 0 or metrics.new_files > 0 or metrics.deleted_files > 0 %}
+<div class="alert-banner alert-warning">
+  <div class="alert-info-content">
+    <div class="alert-icon-wrap">⚡</div>
+    <div>
+      <div class="alert-title">SECURITY ALERT: Integrity changes detected</div>
+      <div class="alert-desc">
+        Modified: <strong>{{ metrics.modified_files }}</strong> &nbsp;|&nbsp; 
+        New: <strong>{{ metrics.new_files }}</strong> &nbsp;|&nbsp; 
+        Deleted: <strong>{{ metrics.deleted_files }}</strong>
+      </div>
+    </div>
+  </div>
+  <a href="{{ url_for('investigate_view') }}" class="btn btn-primary btn-sm">VIEW CHANGES &rarr;</a>
+</div>
+{% elif metrics.has_baseline and metrics.total_files > 0 %}
+<div class="alert-banner alert-success">
+  <div class="alert-info-content">
+    <div class="alert-icon-wrap">✓</div>
+    <div>
+      <div class="alert-title">INTEGRITY CHECK PASSED</div>
+      <div class="alert-desc">All {{ metrics.total_files }} monitored files match their trusted baseline cryptographic fingerprints.</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Primary Metric Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Total Protected</span>
+      <span class="stat-icon">📁</span>
+    </div>
+    <div class="stat-value">{{ metrics.total_files }}</div>
+    <div class="stat-subtext">Monitored files in catalog</div>
+  </div>
+
+  <div class="stat-card card-safe">
+    <div class="stat-header">
+      <span class="stat-label">Safe Files</span>
+      <span class="stat-icon">🛡️</span>
+    </div>
+    <div class="stat-value">{{ metrics.safe_files }}</div>
+    <div class="stat-subtext">Verified SHA-256 match</div>
+  </div>
+
+  <div class="stat-card card-modified">
+    <div class="stat-header">
+      <span class="stat-label">Modified</span>
+      <span class="stat-icon">⚠️</span>
+    </div>
+    <div class="stat-value">{{ metrics.modified_files }}</div>
+    <div class="stat-subtext">Unexpected hash diffs</div>
+  </div>
+
+  <div class="stat-card card-new">
+    <div class="stat-header">
+      <span class="stat-label">New Files</span>
+      <span class="stat-icon">➕</span>
+    </div>
+    <div class="stat-value">{{ metrics.new_files }}</div>
+    <div class="stat-subtext">Unmonitored entries</div>
+  </div>
+
+  <div class="stat-card card-deleted">
+    <div class="stat-header">
+      <span class="stat-label">Deleted</span>
+      <span class="stat-icon">🗑️</span>
+    </div>
+    <div class="stat-value">{{ metrics.deleted_files }}</div>
+    <div class="stat-subtext">Missing from storage</div>
+  </div>
+
+  <div class="stat-card card-score">
+    <div class="stat-header">
+      <span class="stat-label">Integrity Score</span>
+      <span class="stat-icon">📈</span>
+    </div>
+    <div class="stat-value">{{ metrics.integrity_score }}%</div>
+    <div class="stat-subtext">Safe / Total monitored files</div>
+  </div>
+</div>
+
+<!-- Baseline & Last Scan Overview Card -->
+<div class="card">
+  <div class="card-title">🔍 Monitoring Status</div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Baseline State</div>
+      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+        {% if metrics.has_baseline %}
+          <span style="color: var(--color-safe);">● ACTIVE</span> ({{ metrics.total_files }} files protected)
+        {% else %}
+          <span style="color: var(--accent-gold);">● NOT INITIALIZED</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Last Scan Execution</div>
+      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+        {% if metrics.latest_scan %}
+          {{ metrics.latest_scan.scan_time }}
+        {% else %}
+          <span style="color: var(--text-muted);">No scans recorded yet</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Total Security Events</div>
+      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+        {{ metrics.total_events }} Recorded Anomalies
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Visual Charts Section -->
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="card-title">📊 File Status Distribution</div>
+    <div class="card-desc">Current breakdown of cryptographic verification states</div>
+    <div class="chart-container">
+      <canvas id="chart-status-distribution"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-title">📈 Integrity Score Trend</div>
+    <div class="card-desc">Historical application health score over time</div>
+    <div class="chart-container">
+      <canvas id="chart-score-trend"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="chart-card" style="margin-bottom: 2rem;">
+  <div class="card-title">🕒 Scan Activity & Change History</div>
+  <div class="card-desc">Volume of safe, modified, new, and deleted files detected in past scans</div>
+  <div class="chart-container" style="height: 280px;">
+    <canvas id="chart-scan-activity"></canvas>
+  </div>
+</div>
+{% endblock %}

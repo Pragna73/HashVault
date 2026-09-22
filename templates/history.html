@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Scan History — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Scan History Archive</h2>
+    <p class="page-subtitle">Chronological record of all executed file integrity scans</p>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-primary" id="btn-run-scan">🔍 Run New Scan</button>
+  </div>
+</div>
+
+<div class="card">
+  {% if scans %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Scan ID</th>
+          <th>Execution Timestamp</th>
+          <th>Total Scanned</th>
+          <th>Safe</th>
+          <th>Modified</th>
+          <th>New</th>
+          <th>Deleted</th>
+          <th>Integrity Score</th>
+          <th>Audit Report</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in scans %}
+        <tr>
+          <td style="font-weight: 700; color: #fff;">#{{ s.id }}</td>
+          <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ s.scan_time }}</td>
+          <td style="font-weight: 600;">{{ s.total_files }}</td>
+          <td style="color: var(--color-safe); font-weight: 600;">{{ s.safe_files }}</td>
+          <td style="color: var(--color-modified); font-weight: 600;">{{ s.modified_files }}</td>
+          <td style="color: var(--color-new); font-weight: 600;">{{ s.new_files }}</td>
+          <td style="color: var(--color-deleted); font-weight: 600;">{{ s.deleted_files }}</td>
+          <td>
+            <span style="font-weight: 800; color: {% if s.integrity_score == 100 %}var(--color-safe){% elif s.integrity_score >= 80 %}var(--color-modified){% else %}var(--color-deleted){% endif %};">
+              {{ s.integrity_score }}%
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('report_view', scan_id=s.id) }}" class="btn btn-secondary btn-sm">
+              📄 View Report &rarr;
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🕒</div>
+    <div style="font-size: 1.1rem; font-weight: 600; color: #fff;">No Scans in History</div>
+    <p style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-muted);">
+      Historical scan summaries will appear here once integrity checks are performed.
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Security Audit Report — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Security Audit Report</h2>
+    <p class="page-subtitle">Official file integrity inspection report and compliance verification summary</p>
+  </div>
+  <div class="btn-group">
+    {% if report.summary.scan_id %}
+      <a href="{{ url_for('export_csv_view', scan_id=report.summary.scan_id) }}" class="btn btn-secondary btn-sm">📥 Export CSV</a>
+      <a href="{{ url_for('export_json_view', scan_id=report.summary.scan_id) }}" class="btn btn-secondary btn-sm">📥 Export JSON</a>
+    {% else %}
+      <a href="{{ url_for('export_csv_view') }}" class="btn btn-secondary btn-sm">📥 Export CSV</a>
+      <a href="{{ url_for('export_json_view') }}" class="btn btn-secondary btn-sm">📥 Export JSON</a>
+    {% endif %}
+    <button type="button" class="btn btn-outline-gold btn-sm" onclick="window.print()">🖨️ Print Report</button>
+  </div>
+</div>
+
+<!-- Printable Audit Report Card -->
+<div class="card" style="background: var(--bg-card); border-color: var(--border-color); padding: 2rem;">
+  <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: 0.5px;">
+        HASHVAULT SECURITY REPORT
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+        Cryptographic SHA-256 File Integrity Monitoring Engine
+      </div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 0.8rem; color: var(--text-secondary);">Report Generated:</div>
+      <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">{{ report.generated_at }}</div>
+      <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.2rem;">
+        {% if report.summary.scan_id %}Scan Record #{{ report.summary.scan_id }}{% else %}Live Snapshot{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Metric Banner -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 2rem;">
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary);">Scan Date</div>
+      <div style="font-size: 0.9rem; font-weight: 600; color: #fff; margin-top: 0.2rem;">{{ report.summary.scan_time }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary);">Total Files</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">{{ report.summary.total_files }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-safe);">Safe Files</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-safe); margin-top: 0.2rem;">{{ report.summary.safe_files }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-modified);">Modified</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-modified); margin-top: 0.2rem;">{{ report.summary.modified_files }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-new);">New</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-new); margin-top: 0.2rem;">{{ report.summary.new_files }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-deleted);">Deleted</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-deleted); margin-top: 0.2rem;">{{ report.summary.deleted_files }}</div>
+    </div>
+    <div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--accent-gold);">Integrity Score</div>
+      <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); margin-top: 0.2rem;">{{ report.summary.integrity_score }}%</div>
+    </div>
+  </div>
+
+  <!-- Detected Changes Section -->
+  <div style="margin-bottom: 2rem;">
+    <div class="card-title">⚡ Detected Changes & Security Events</div>
+    <div class="card-desc">All anomalies detected relative to the baseline</div>
+
+    {% if report.events %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>File</th>
+            <th>Event Type</th>
+            <th>Original Hash (Baseline)</th>
+            <th>Current Hash (Observed)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in report.events %}
+          <tr>
+            <td style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">{{ ev.timestamp }}</td>
+            <td style="font-weight: 600; color: #fff;">{{ ev.filename or ev.filepath }}</td>
+            <td>
+              {% if ev.event_type == 'MODIFIED' %}
+                <span class="badge badge-modified">MODIFIED</span>
+              {% elif ev.event_type == 'NEW' %}
+                <span class="badge badge-new">NEW</span>
+              {% elif ev.event_type == 'DELETED' %}
+                <span class="badge badge-deleted">DELETED</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if ev.old_hash and ev.old_hash != 'NONE (New unmonitored file)' %}
+                <div class="hash-snippet" data-hash="{{ ev.old_hash }}">
+                  <span>{{ ev.old_hash[:10] }}...{{ ev.old_hash[-8:] }}</span>
+                </div>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.75rem;">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if ev.new_hash and ev.new_hash != 'NONE (File removed)' %}
+                <div class="hash-snippet" data-hash="{{ ev.new_hash }}">
+                  <span>{{ ev.new_hash[:10] }}...{{ ev.new_hash[-8:] }}</span>
+                </div>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.75rem;">None</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--color-safe); background: var(--color-safe-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-safe-border);">
+      ✓ No unexpected changes detected. File system integrity is intact.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Monitored Assets Summary Table -->
+  <div>
+    <div class="card-title">📋 Monitored File Status Summary</div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Path</th>
+            <th>Baseline SHA-256</th>
+            <th>Status</th>
+            <th>Last Checked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in report.files %}
+          <tr>
+            <td style="font-weight: 600; color: #fff;">{{ f.filename }}</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">{{ f.filepath }}</td>
+            <td>
+              {% if f.baseline_hash and f.baseline_hash != 'NONE (Unmonitored)' %}
+                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #cbd5e1;">{{ f.baseline_hash[:10] }}...{{ f.baseline_hash[-8:] }}</span>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Unmonitored</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if f.status == 'SAFE' %}
+                <span class="badge badge-safe">SAFE</span>
+              {% elif f.status == 'MODIFIED' %}
+                <span class="badge badge-modified">MODIFIED</span>
+              {% elif f.status == 'NEW' %}
+                <span class="badge badge-new">NEW</span>
+              {% elif f.status == 'DELETED' %}
+                <span class="badge badge-deleted">DELETED</span>
+              {% endif %}
+            </td>
+            <td style="font-size: 0.8rem; color: var(--text-secondary);">{{ f.last_checked }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Security Disclaimer Footer -->
+  <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+    <strong>HashVault Security Advisory:</strong> This report reflects SHA-256 cryptographic state verification. Detected modifications reflect content changes and require human administrative verification before determining intent.
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Scan & Baseline — HashVault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2 class="page-title">Scan & Baseline Control</h2>
+    <p class="page-subtitle">Manage the trusted cryptographic baseline and execute real-time integrity verification</p>
+  </div>
+</div>
+
+<!-- Scanning Controls Box -->
+<div class="card">
+  <div class="card-title">⚙️ Monitoring Parameters</div>
+  <div class="card-desc">Target directory currently watched by HashVault</div>
+
+  <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-input); padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase;">Protected Directory:</div>
+    <div style="font-family: var(--font-mono); font-size: 0.9rem; color: #fff;">{{ target_dir }}</div>
+    <div style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);">Algorithm: SHA-256 (64KB Chunks, 50MB Limit)</div>
+  </div>
+
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+    <button type="button" class="btn btn-secondary" id="btn-create-baseline">
+      ⚡ CREATE BASELINE
+    </button>
+    <button type="button" class="btn btn-primary" id="btn-run-scan">
+      🔍 RUN INTEGRITY SCAN
+    </button>
+  </div>
+</div>
+
+<!-- Live/Latest Scan Results Card -->
+<div class="card">
+  <div class="card-title">📊 Last Scan Results</div>
+  <div class="card-desc">Summary metrics from the latest file integrity verification run</div>
+
+  {% if latest_scan %}
+    {% if latest_scan.modified_files > 0 or latest_scan.new_files > 0 or latest_scan.deleted_files > 0 %}
+    <div class="alert-banner alert-warning" style="margin-bottom: 1.5rem;">
+      <div class="alert-info-content">
+        <div class="alert-icon-wrap">⚠️</div>
+        <div>
+          <div class="alert-title">SECURITY ALERT: Cryptographic changes detected!</div>
+          <div class="alert-desc">Scan executed at {{ latest_scan.scan_time }} found unexpected changes in protected directory.</div>
+        </div>
+      </div>
+      <a href="{{ url_for('investigate_view') }}" class="btn btn-primary btn-sm">INVESTIGATE &rarr;</a>
+    </div>
+    {% else %}
+    <div class="alert-banner alert-success" style="margin-bottom: 1.5rem;">
+      <div class="alert-info-content">
+        <div class="alert-icon-wrap">✓</div>
+        <div>
+          <div class="alert-title">INTEGRITY CHECK PASSED</div>
+          <div class="alert-desc">Scan executed at {{ latest_scan.scan_time }}. All files matched baseline fingerprints.</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="stats-grid" style="margin-bottom: 0;">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Total Files</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.total_files }}</div>
+      </div>
+
+      <div class="stat-card card-safe">
+        <div class="stat-header">
+          <span class="stat-label">Safe</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.safe_files }}</div>
+      </div>
+
+      <div class="stat-card card-modified">
+        <div class="stat-header">
+          <span class="stat-label">Modified</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.modified_files }}</div>
+      </div>
+
+      <div class="stat-card card-new">
+        <div class="stat-header">
+          <span class="stat-label">New</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.new_files }}</div>
+      </div>
+
+      <div class="stat-card card-deleted">
+        <div class="stat-header">
+          <span class="stat-label">Deleted</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.deleted_files }}</div>
+      </div>
+
+      <div class="stat-card card-score">
+        <div class="stat-header">
+          <span class="stat-label">Integrity Score</span>
+        </div>
+        <div class="stat-value">{{ latest_scan.integrity_score }}%</div>
+      </div>
+    </div>
+  {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+      No integrity scans executed yet. Click <strong>RUN INTEGRITY SCAN</strong> to verify filesystem state.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
