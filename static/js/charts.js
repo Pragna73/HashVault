@@ -1,5 +1,6 @@
 /**
- * HashVault Chart.js Visualizations
+ * HashVault Modern Chart.js Visualizations
+ * Palette: Electric Indigo, Emerald Neon, Amber Gold, Cyber Cyan, Rose Crimson
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,7 +43,7 @@ function renderStatusDistribution(canvas, dist) {
 
     if (total === 0) {
         const parent = canvas.parentElement;
-        parent.innerHTML = '<div class="chart-empty"><p>No monitored files in baseline yet.<br>Create a baseline to view status distribution.</p></div>';
+        parent.innerHTML = '<div class="chart-empty"><p>No monitored files in baseline yet.<br>Create a baseline to view distribution.</p></div>';
         return;
     }
 
@@ -53,14 +54,14 @@ function renderStatusDistribution(canvas, dist) {
             datasets: [{
                 data: [dist.safe, dist.modified, dist.new, dist.deleted],
                 backgroundColor: [
-                    '#10b981', // Safe (Green)
+                    '#10b981', // Safe (Emerald)
                     '#f59e0b', // Modified (Amber)
                     '#06b6d4', // New (Cyan)
-                    '#ef4444'  // Deleted (Red)
+                    '#f43f5e'  // Deleted (Rose)
                 ],
-                borderColor: '#151d30',
-                borderWidth: 3,
-                hoverOffset: 4
+                borderColor: '#101726',
+                borderWidth: 4,
+                hoverOffset: 6
             }]
         },
         options: {
@@ -71,23 +72,23 @@ function renderStatusDistribution(canvas, dist) {
                     position: 'bottom',
                     labels: {
                         color: '#94a3b8',
-                        font: { family: 'Inter', size: 12 },
-                        padding: 15,
+                        font: { family: 'Inter', size: 12, weight: 500 },
+                        padding: 16,
                         usePointStyle: true,
                         pointStyle: 'circle'
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#111726',
+                    backgroundColor: '#0f172a',
                     titleColor: '#fff',
                     bodyColor: '#cbd5e1',
-                    borderColor: '#232f48',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
                     borderWidth: 1,
-                    padding: 10,
-                    cornerRadius: 6
+                    padding: 12,
+                    cornerRadius: 8
                 }
             },
-            cutout: '70%'
+            cutout: '72%'
         }
     });
 }
@@ -102,10 +103,14 @@ function renderScoreTrend(canvas, scans) {
         return;
     }
 
-    // Scans come newest first, reverse for chronological chart
     const chronologicalScans = [...scans].reverse();
-    const labels = chronologicalScans.map((s, idx) => `Scan #${s.id}`);
+    const labels = chronologicalScans.map(s => `Scan #${s.id}`);
     const scores = chronologicalScans.map(s => s.integrity_score);
+
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
+    gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
     new Chart(canvas, {
         type: 'line',
@@ -114,15 +119,16 @@ function renderScoreTrend(canvas, scans) {
             datasets: [{
                 label: 'Integrity Score (%)',
                 data: scores,
-                borderColor: '#f59e0b',
-                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderColor: '#6366f1',
+                backgroundColor: gradient,
+                borderWidth: 3,
                 fill: true,
                 tension: 0.35,
-                pointBackgroundColor: '#f59e0b',
-                pointBorderColor: '#fff',
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
@@ -132,7 +138,7 @@ function renderScoreTrend(canvas, scans) {
                 y: {
                     min: 0,
                     max: 100,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
                     ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } }
                 },
                 x: {
@@ -143,13 +149,13 @@ function renderScoreTrend(canvas, scans) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#111726',
+                    backgroundColor: '#0f172a',
                     titleColor: '#fff',
                     bodyColor: '#cbd5e1',
-                    borderColor: '#232f48',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
                     borderWidth: 1,
-                    padding: 10,
-                    cornerRadius: 6,
+                    padding: 12,
+                    cornerRadius: 8,
                     callbacks: {
                         label: function(ctx) {
                             return ` Score: ${ctx.parsed.y}%`;
@@ -187,25 +193,25 @@ function renderScanActivity(canvas, scans) {
                     label: 'Safe',
                     data: safeData,
                     backgroundColor: '#10b981',
-                    borderRadius: 4
+                    borderRadius: 6
                 },
                 {
                     label: 'Modified',
                     data: modifiedData,
                     backgroundColor: '#f59e0b',
-                    borderRadius: 4
+                    borderRadius: 6
                 },
                 {
                     label: 'New',
                     data: newData,
                     backgroundColor: '#06b6d4',
-                    borderRadius: 4
+                    borderRadius: 6
                 },
                 {
                     label: 'Deleted',
                     data: deletedData,
-                    backgroundColor: '#ef4444',
-                    borderRadius: 4
+                    backgroundColor: '#f43f5e',
+                    borderRadius: 6
                 }
             ]
         },
@@ -221,7 +227,7 @@ function renderScanActivity(canvas, scans) {
                 y: {
                     stacked: true,
                     beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
                     ticks: { color: '#64748b', font: { family: 'Inter', size: 11 }, precision: 0 }
                 }
             },
@@ -230,19 +236,19 @@ function renderScanActivity(canvas, scans) {
                     position: 'bottom',
                     labels: {
                         color: '#94a3b8',
-                        font: { family: 'Inter', size: 12 },
-                        padding: 12,
+                        font: { family: 'Inter', size: 12, weight: 500 },
+                        padding: 14,
                         usePointStyle: true
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#111726',
+                    backgroundColor: '#0f172a',
                     titleColor: '#fff',
                     bodyColor: '#cbd5e1',
-                    borderColor: '#232f48',
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
                     borderWidth: 1,
-                    padding: 10,
-                    cornerRadius: 6
+                    padding: 12,
+                    cornerRadius: 8
                 }
             }
         }

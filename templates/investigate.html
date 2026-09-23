@@ -3,10 +3,10 @@
 {% block title %}Investigation Mode — HashVault{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header-row">
   <div>
     <h2 class="page-title">Security Investigation Mode</h2>
-    <p class="page-subtitle">Detailed cryptographic anomaly analysis and incident triage</p>
+    <p class="page-subtitle">Cryptographic anomaly triage, digest diffing, and security interpretation</p>
   </div>
   <div class="btn-group">
     <button type="button" class="btn btn-primary" id="btn-run-scan">🔍 Re-Scan Filesystem</button>
@@ -18,7 +18,7 @@
     <div class="alert-info-content">
       <div class="alert-icon-wrap">🔬</div>
       <div>
-        <div class="alert-title">{{ anomalies|length }} Anomaly / Anomalies Requiring Review</div>
+        <div class="alert-title">{{ anomalies|length }} Cryptographic Anomaly / Anomalies Requiring Review</div>
         <div class="alert-desc">Evaluate the cryptographic findings below to determine whether changes stem from authorized operations or unexpected modifications.</div>
       </div>
     </div>
@@ -45,9 +45,9 @@
     </div>
 
     <!-- Hash Comparison Details -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
       <div>
-        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.35rem;">
           Baseline Fingerprint (Original)
         </div>
         <div class="hash-block" style="font-size: 0.75rem;">
@@ -59,10 +59,10 @@
       </div>
 
       <div>
-        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.35rem;">
           Observed Fingerprint (Current)
         </div>
-        <div class="hash-block" style="font-size: 0.75rem; {% if item.event_type == 'MODIFIED' %}border-color: var(--color-modified);{% endif %}">
+        <div class="hash-block" style="font-size: 0.75rem; {% if item.event_type == 'MODIFIED' %}border-color: var(--status-modified);{% endif %}">
           <span>{{ item.new_hash }}</span>
           {% if item.new_hash and item.new_hash != 'NONE (File removed)' %}
             <button type="button" class="copy-btn" data-hash="{{ item.new_hash }}" title="Copy Observed Hash">📋</button>
@@ -92,17 +92,17 @@
 
     <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
       <div>Detection Recorded: {{ item.timestamp }}</div>
-      <div>Event Log ID: #{{ item.id }}</div>
+      <div>Record ID: #{{ item.id }}</div>
     </div>
   </div>
   {% endfor %}
 
 {% else %}
-  <div class="card" style="text-align: center; padding: 3.5rem 1rem;">
+  <div class="card" style="text-align: center; padding: 4rem 1rem;">
     <div style="font-size: 3rem; margin-bottom: 0.75rem;">🛡️</div>
-    <div style="font-size: 1.25rem; font-weight: 700; color: #fff;">No Active Anomalies Detected</div>
+    <div style="font-size: 1.3rem; font-weight: 800; color: #fff;">No Active Anomalies Detected</div>
     <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; max-width: 500px; margin-left: auto; margin-right: auto;">
-      All monitored files are currently in a <strong>SAFE</strong> status matching their baseline cryptographic fingerprints.
+      All monitored assets are currently in a <strong>SAFE</strong> status matching their trusted baseline SHA-256 cryptographic fingerprints.
     </p>
     <div style="margin-top: 1.5rem;">
       <a href="{{ url_for('files_view') }}" class="btn btn-secondary">View File Inventory</a>

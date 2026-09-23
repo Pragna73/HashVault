@@ -3,7 +3,7 @@
 {% block title %}Scan & Baseline — HashVault{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header-row">
   <div>
     <h2 class="page-title">Scan & Baseline Control</h2>
     <p class="page-subtitle">Manage the trusted cryptographic baseline and execute real-time integrity verification</p>
@@ -12,16 +12,16 @@
 
 <!-- Scanning Controls Box -->
 <div class="card">
-  <div class="card-title">⚙️ Monitoring Parameters</div>
-  <div class="card-desc">Target directory currently watched by HashVault</div>
+  <div class="card-title">⚙️ Monitoring Environment</div>
+  <div class="card-desc">Target directory currently protected by HashVault engine</div>
 
-  <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-input); padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap;">
-    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase;">Protected Directory:</div>
+  <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-input); padding: 1rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div style="font-size: 0.8rem; font-weight: 700; color: #818cf8; text-transform: uppercase;">Protected Directory:</div>
     <div style="font-family: var(--font-mono); font-size: 0.9rem; color: #fff;">{{ target_dir }}</div>
-    <div style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);">Algorithm: SHA-256 (64KB Chunks, 50MB Limit)</div>
+    <div style="margin-left: auto; font-size: 0.8rem; color: var(--text-muted);">Algorithm: SHA-256 (64KB Streaming Chunks)</div>
   </div>
 
-  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+  <div class="btn-group">
     <button type="button" class="btn btn-secondary" id="btn-create-baseline">
       ⚡ CREATE BASELINE
     </button>
@@ -54,7 +54,7 @@
         <div class="alert-icon-wrap">✓</div>
         <div>
           <div class="alert-title">INTEGRITY CHECK PASSED</div>
-          <div class="alert-desc">Scan executed at {{ latest_scan.scan_time }}. All files matched baseline fingerprints.</div>
+          <div class="alert-desc">Scan executed at {{ latest_scan.scan_time }}. All monitored files matched baseline fingerprints.</div>
         </div>
       </div>
     </div>
@@ -104,8 +104,8 @@
       </div>
     </div>
   {% else %}
-    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-      No integrity scans executed yet. Click <strong>RUN INTEGRITY SCAN</strong> to verify filesystem state.
+    <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+      No integrity scans executed yet. Click <strong>RUN INTEGRITY SCAN</strong> to verify filesystem integrity.
     </div>
   {% endif %}
 </div>

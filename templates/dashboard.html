@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard — HashVault File Integrity Monitoring{% endblock %}
+{% block title %}Security Dashboard — HashVault Pro{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header-row">
   <div>
-    <h2 class="page-title">Security Dashboard</h2>
-    <p class="page-subtitle">Real-time cryptographic file integrity status and incident overview</p>
+    <h2 class="page-title">Security Intelligence Dashboard</h2>
+    <p class="page-subtitle">Real-time cryptographic file integrity status and fleet anomaly overview</p>
   </div>
   <div class="btn-group">
     <button type="button" class="btn btn-secondary" id="btn-create-baseline">⚡ Create Baseline</button>
@@ -20,7 +20,7 @@
   <div class="alert-info-content">
     <div class="alert-icon-wrap">⚡</div>
     <div>
-      <div class="alert-title">SECURITY ALERT: Integrity changes detected</div>
+      <div class="alert-title">SECURITY ALERT: Cryptographic changes detected</div>
       <div class="alert-desc">
         Modified: <strong>{{ metrics.modified_files }}</strong> &nbsp;|&nbsp; 
         New: <strong>{{ metrics.new_files }}</strong> &nbsp;|&nbsp; 
@@ -28,7 +28,7 @@
       </div>
     </div>
   </div>
-  <a href="{{ url_for('investigate_view') }}" class="btn btn-primary btn-sm">VIEW CHANGES &rarr;</a>
+  <a href="{{ url_for('investigate_view') }}" class="btn btn-primary btn-sm">INVESTIGATE ANOMALIES &rarr;</a>
 </div>
 {% elif metrics.has_baseline and metrics.total_files > 0 %}
 <div class="alert-banner alert-success">
@@ -36,26 +36,26 @@
     <div class="alert-icon-wrap">✓</div>
     <div>
       <div class="alert-title">INTEGRITY CHECK PASSED</div>
-      <div class="alert-desc">All {{ metrics.total_files }} monitored files match their trusted baseline cryptographic fingerprints.</div>
+      <div class="alert-desc">All {{ metrics.total_files }} monitored assets match their trusted baseline SHA-256 cryptographic fingerprints.</div>
     </div>
   </div>
 </div>
 {% endif %}
 
-<!-- Primary Metric Cards -->
+<!-- Primary Metric Cards Grid -->
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-header">
-      <span class="stat-label">Total Protected</span>
+      <span class="stat-label">Total Monitored</span>
       <span class="stat-icon">📁</span>
     </div>
     <div class="stat-value">{{ metrics.total_files }}</div>
-    <div class="stat-subtext">Monitored files in catalog</div>
+    <div class="stat-subtext">Protected files in catalog</div>
   </div>
 
   <div class="stat-card card-safe">
     <div class="stat-header">
-      <span class="stat-label">Safe Files</span>
+      <span class="stat-label">Verified Safe</span>
       <span class="stat-icon">🛡️</span>
     </div>
     <div class="stat-value">{{ metrics.safe_files }}</div>
@@ -86,7 +86,7 @@
       <span class="stat-icon">🗑️</span>
     </div>
     <div class="stat-value">{{ metrics.deleted_files }}</div>
-    <div class="stat-subtext">Missing from storage</div>
+    <div class="stat-subtext">Missing from filesystem</div>
   </div>
 
   <div class="stat-card card-score">
@@ -99,24 +99,24 @@
   </div>
 </div>
 
-<!-- Baseline & Last Scan Overview Card -->
+<!-- System Status Grid Card -->
 <div class="card">
-  <div class="card-title">🔍 Monitoring Status</div>
+  <div class="card-title">🔍 Monitoring System Parameters</div>
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
     <div>
-      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Baseline State</div>
-      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+      <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Baseline State</div>
+      <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
         {% if metrics.has_baseline %}
-          <span style="color: var(--color-safe);">● ACTIVE</span> ({{ metrics.total_files }} files protected)
+          <span style="color: var(--status-safe);">● ACTIVE</span> ({{ metrics.total_files }} files protected)
         {% else %}
-          <span style="color: var(--accent-gold);">● NOT INITIALIZED</span>
+          <span style="color: var(--status-modified);">● NOT INITIALIZED</span>
         {% endif %}
       </div>
     </div>
 
     <div>
-      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Last Scan Execution</div>
-      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+      <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Last Scan Execution</div>
+      <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
         {% if metrics.latest_scan %}
           {{ metrics.latest_scan.scan_time }}
         {% else %}
@@ -126,8 +126,8 @@
     </div>
 
     <div>
-      <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Total Security Events</div>
-      <div style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">
+      <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Total Security Events</div>
+      <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">
         {{ metrics.total_events }} Recorded Anomalies
       </div>
     </div>
@@ -154,7 +154,7 @@
 </div>
 
 <div class="chart-card" style="margin-bottom: 2rem;">
-  <div class="card-title">🕒 Scan Activity & Change History</div>
+  <div class="card-title">🕒 Scan Activity & Change Volume</div>
   <div class="card-desc">Volume of safe, modified, new, and deleted files detected in past scans</div>
   <div class="chart-container" style="height: 280px;">
     <canvas id="chart-scan-activity"></canvas>

@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="HashVault — Defensive File Integrity Monitoring and Cryptographic Security Investigation System">
+  <meta name="description" content="HashVault — Next-Gen File Integrity Monitoring & Cryptographic Security Intelligence">
   <title>{% block title %}HashVault — File Integrity Monitoring{% endblock %}</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -19,62 +19,134 @@
 </head>
 <body>
 
-  <!-- Top Application Header & Navigation -->
-  <header class="app-header">
-    <div class="header-container">
-      <a href="{{ url_for('dashboard_view') }}" class="brand-section">
-        <div class="brand-icon">⚡</div>
-        <div class="brand-text">
-          <h1>HASHVAULT <span class="brand-tag">SHA-256</span></h1>
-          <div class="brand-subtitle">File Integrity Monitoring & Security Investigation</div>
+  <div class="app-container">
+    <!-- Modern Left Sidebar -->
+    <aside class="app-sidebar">
+      <a href="{{ url_for('dashboard_view') }}" class="sidebar-brand">
+        <div class="brand-icon-box">⚡</div>
+        <div class="brand-text-block">
+          <h1>HASHVAULT <span class="brand-badge">PRO</span></h1>
+          <div class="brand-sub">Security Intelligence & FIM</div>
         </div>
       </a>
 
-      <nav>
-        <ul class="nav-links">
-          <li><a href="{{ url_for('dashboard_view') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a></li>
-          <li><a href="{{ url_for('files_view') }}" class="nav-link {% if active_page == 'files' %}active{% endif %}">📁 Protected Files</a></li>
-          <li><a href="{{ url_for('scan_view') }}" class="nav-link {% if active_page == 'scan' %}active{% endif %}">⚡ Scan & Baseline</a></li>
-          <li><a href="{{ url_for('events_view') }}" class="nav-link {% if active_page == 'events' %}active{% endif %}">📋 Events</a></li>
-          <li><a href="{{ url_for('investigate_view') }}" class="nav-link {% if active_page == 'investigate' %}active{% endif %}">🔬 Investigation</a></li>
-          <li><a href="{{ url_for('history_view') }}" class="nav-link {% if active_page == 'history' %}active{% endif %}">🕒 History</a></li>
-          <li><a href="{{ url_for('report_view') }}" class="nav-link {% if active_page == 'report' %}active{% endif %}">📑 Report</a></li>
-        </ul>
-      </nav>
+      <div class="sidebar-nav-title">Navigation</div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="{{ url_for('dashboard_view') }}" class="nav-item-link {% if active_page == 'dashboard' %}active{% endif %}">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('files_view') }}" class="nav-item-link {% if active_page == 'files' %}active{% endif %}">
+            <span class="nav-icon">📁</span>
+            <span>Protected Files</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('scan_view') }}" class="nav-item-link {% if active_page == 'scan' %}active{% endif %}">
+            <span class="nav-icon">⚡</span>
+            <span>Scan & Baseline</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('events_view') }}" class="nav-item-link {% if active_page == 'events' %}active{% endif %}">
+            <span class="nav-icon">📋</span>
+            <span>Security Events</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('investigate_view') }}" class="nav-item-link {% if active_page == 'investigate' %}active{% endif %}">
+            <span class="nav-icon">🔬</span>
+            <span>Investigation</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('history_view') }}" class="nav-item-link {% if active_page == 'history' %}active{% endif %}">
+            <span class="nav-icon">🕒</span>
+            <span>Scan History</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('report_view') }}" class="nav-item-link {% if active_page == 'report' %}active{% endif %}">
+            <span class="nav-icon">📑</span>
+            <span>Audit Report</span>
+          </a>
+        </li>
+      </ul>
 
-      <div class="header-status-pill">
-        {% if metrics and (metrics.modified_files > 0 or metrics.new_files > 0 or metrics.deleted_files > 0) %}
-          <div class="status-dot alert"></div>
-          <span>Status: <strong>ATTENTION</strong></span>
-        {% else %}
-          <div class="status-dot"></div>
-          <span>Status: <strong>SECURED</strong></span>
-        {% endif %}
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content Body -->
-  <main class="main-wrapper">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert-banner alert-{{ category }}">
-            <div class="alert-info-content">
-              <div class="alert-icon-wrap">
-                {% if category == 'success' %}✓{% elif category == 'danger' %}⚠{% else %}⚡{% endif %}
-              </div>
-              <div>
-                <div class="alert-title">{{ message }}</div>
-              </div>
+      <!-- Bottom System Status in Sidebar -->
+      <div class="sidebar-footer">
+        <div class="system-status-indicator">
+          {% if metrics and (metrics.modified_files > 0 or metrics.new_files > 0 or metrics.deleted_files > 0) %}
+            <div class="pulse-dot alert"></div>
+            <div>
+              <div style="font-weight: 700; color: #fff;">Status: Attention</div>
+              <div style="color: var(--status-modified); font-size: 0.72rem;">{{ metrics.modified_files + metrics.new_files + metrics.deleted_files }} anomalies active</div>
             </div>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+          {% else %}
+            <div class="pulse-dot"></div>
+            <div>
+              <div style="font-weight: 700; color: #fff;">Status: Protected</div>
+              <div style="color: var(--status-safe); font-size: 0.72rem;">SHA-256 Verified</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </aside>
 
-    {% block content %}{% endblock %}
-  </main>
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Top Navigation Bar -->
+      <header class="top-navbar">
+        <div class="breadcrumb-area">
+          <span>Security Engine</span>
+          <span>/</span>
+          <strong>{{ active_page|capitalize if active_page else 'Dashboard' }}</strong>
+        </div>
+
+        <div class="top-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-create-baseline">
+            ⚡ Baseline
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-run-scan">
+            🔍 Run Scan
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Container -->
+      <main class="content-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert-banner alert-{{ category }}">
+                <div class="alert-info-content">
+                  <div class="alert-icon-wrap">
+                    {% if category == 'success' %}✓{% elif category == 'danger' %}⚠{% else %}⚡{% endif %}
+                  </div>
+                  <div>
+                    <div class="alert-title">{{ message }}</div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <div class="footer-content">
+          <div>HashVault Security Suite • Defensive Cryptographic Verification</div>
+          <div>SHA-256 Engine • Parameterized SQLite Storage • Local Sandbox</div>
+        </div>
+      </footer>
+    </div>
+  </div>
 
   <!-- Baseline Replacement Confirmation Modal -->
   <div class="modal-backdrop" id="baseline-confirm-modal">
@@ -83,7 +155,7 @@
       <div class="modal-body">
         A trusted cryptographic baseline already exists in the database. Creating a new baseline will replace all existing baseline fingerprints with the current files on disk.
         <br><br>
-        Are you sure you want to proceed with establishing a new baseline?
+        Are you sure you want to establish a fresh baseline snapshot?
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
@@ -94,14 +166,6 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
-
-  <!-- Footer -->
-  <footer class="app-footer">
-    <div class="footer-content">
-      <div>HashVault Security Monitoring System • Defensive Cryptographic Verification</div>
-      <div>Algorithm: SHA-256 (Chunked Streaming) • Local Engine</div>
-    </div>
-  </footer>
 
   <!-- Core Scripts -->
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

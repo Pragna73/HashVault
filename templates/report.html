@@ -3,7 +3,7 @@
 {% block title %}Security Audit Report — HashVault{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header-row">
   <div>
     <h2 class="page-title">Security Audit Report</h2>
     <p class="page-subtitle">Official file integrity inspection report and compliance verification summary</p>
@@ -21,54 +21,54 @@
 </div>
 
 <!-- Printable Audit Report Card -->
-<div class="card" style="background: var(--bg-card); border-color: var(--border-color); padding: 2rem;">
-  <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+<div class="card" style="padding: 2.25rem;">
+  <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <div style="font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: 0.5px;">
+      <div style="font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: 0.5px;">
         HASHVAULT SECURITY REPORT
       </div>
-      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
-        Cryptographic SHA-256 File Integrity Monitoring Engine
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+        Cryptographic SHA-256 File Integrity Monitoring & Compliance Verification
       </div>
     </div>
     <div style="text-align: right;">
-      <div style="font-size: 0.8rem; color: var(--text-secondary);">Report Generated:</div>
-      <div style="font-weight: 600; font-size: 0.9rem; color: #fff;">{{ report.generated_at }}</div>
-      <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.2rem;">
+      <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Report Generated:</div>
+      <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">{{ report.generated_at }}</div>
+      <div style="font-size: 0.75rem; color: #818cf8; margin-top: 0.2rem; font-weight: 600;">
         {% if report.summary.scan_id %}Scan Record #{{ report.summary.scan_id }}{% else %}Live Snapshot{% endif %}
       </div>
     </div>
   </div>
 
   <!-- Summary Metric Banner -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 2rem;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary);">Scan Date</div>
-      <div style="font-size: 0.9rem; font-weight: 600; color: #fff; margin-top: 0.2rem;">{{ report.summary.scan_time }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Scan Date</div>
+      <div style="font-size: 0.9rem; font-weight: 600; color: #fff; margin-top: 0.25rem;">{{ report.summary.scan_time }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary);">Total Files</div>
-      <div style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 0.2rem;">{{ report.summary.total_files }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Files</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: #fff; margin-top: 0.25rem;">{{ report.summary.total_files }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-safe);">Safe Files</div>
-      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-safe); margin-top: 0.2rem;">{{ report.summary.safe_files }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--status-safe); font-weight: 700;">Safe Files</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: var(--status-safe); margin-top: 0.25rem;">{{ report.summary.safe_files }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-modified);">Modified</div>
-      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-modified); margin-top: 0.2rem;">{{ report.summary.modified_files }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--status-modified); font-weight: 700;">Modified</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: var(--status-modified); margin-top: 0.25rem;">{{ report.summary.modified_files }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-new);">New</div>
-      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-new); margin-top: 0.2rem;">{{ report.summary.new_files }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--status-new); font-weight: 700;">New</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: var(--status-new); margin-top: 0.25rem;">{{ report.summary.new_files }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-deleted);">Deleted</div>
-      <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-deleted); margin-top: 0.2rem;">{{ report.summary.deleted_files }}</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--status-deleted); font-weight: 700;">Deleted</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: var(--status-deleted); margin-top: 0.25rem;">{{ report.summary.deleted_files }}</div>
     </div>
     <div>
-      <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--accent-gold);">Integrity Score</div>
-      <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); margin-top: 0.2rem;">{{ report.summary.integrity_score }}%</div>
+      <div style="font-size: 0.72rem; text-transform: uppercase; color: #818cf8; font-weight: 700;">Integrity Score</div>
+      <div style="font-size: 1.3rem; font-weight: 800; color: #818cf8; margin-top: 0.25rem;">{{ report.summary.integrity_score }}%</div>
     </div>
   </div>
 
@@ -127,7 +127,7 @@
       </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 2rem; color: var(--color-safe); background: var(--color-safe-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-safe-border);">
+    <div style="text-align: center; padding: 2rem; color: var(--status-safe); background: var(--status-safe-bg); border-radius: var(--radius-sm); border: 1px solid var(--status-safe-border);">
       ✓ No unexpected changes detected. File system integrity is intact.
     </div>
     {% endif %}
@@ -179,7 +179,7 @@
   </div>
 
   <!-- Security Disclaimer Footer -->
-  <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+  <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted); text-align: center;">
     <strong>HashVault Security Advisory:</strong> This report reflects SHA-256 cryptographic state verification. Detected modifications reflect content changes and require human administrative verification before determining intent.
   </div>
 </div>
